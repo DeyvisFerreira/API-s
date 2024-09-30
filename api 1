@@ -1,0 +1,86 @@
+npm init -y
+npm install express
+npm install --save-dev nodemon
+ford-api/
+├── node_modules/
+├── app.js
+├── package.json
+└── routes/
+    └── vehicles.js
+
+const express = require('express');
+const app = express();
+const vehiclesRoutes = require('./routes/vehicles');
+
+// Middleware para JSON
+app.use(express.json());
+
+// Rotas para a API de veículos
+app.use('/api/vehicles', vehiclesRoutes);
+
+// Porta onde o servidor irá rodar
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+});
+const express = require('express');
+const router = express.Router();
+
+// Dados simulados (poderia vir de um banco de dados)
+let vehicles = [
+    { id: 1, make: 'Ford', model: 'Mustang', year: 2020 },
+    { id: 2, make: 'Ford', model: 'Ranger', year: 2021 },
+    { id: 3, make: 'Ford', model: 'Bronco', year: 2023 }
+];
+
+// Rota para obter todos os veículos
+router.get('/', (req, res) => {
+    res.json(vehicles);
+});
+
+// Rota para obter um veículo específico por ID
+router.get('/:id', (req, res) => {
+    const vehicle = vehicles.find(v => v.id === parseInt(req.params.id));
+    if (!vehicle) return res.status(404).send('Veículo não encontrado.');
+    res.json(vehicle);
+});
+
+// Rota para adicionar um novo veículo
+router.post('/', (req, res) => {
+    const newVehicle = {
+        id: vehicles.length + 1,
+        make: req.body.make,
+        model: req.body.model,
+        year: req.body.year
+    };
+    vehicles.push(newVehicle);
+    res.status(201).json(newVehicle);
+});
+
+// Rota para atualizar um veículo existente
+router.put('/:id', (req, res) => {
+    const vehicle = vehicles.find(v => v.id === parseInt(req.params.id));
+    if (!vehicle) return res.status(404).send('Veículo não encontrado.');
+
+    vehicle.make = req.body.make;
+    vehicle.model = req.body.model;
+    vehicle.year = req.body.year;
+
+    res.json(vehicle);
+});
+
+// Rota para deletar um veículo
+router.delete('/:id', (req, res) => {
+    const vehicleIndex = vehicles.findIndex(v => v.id === parseInt(req.params.id));
+    if (vehicleIndex === -1) return res.status(404).send('Veículo não encontrado.');
+
+    vehicles.splice(vehicleIndex, 1);
+    res.status(204).send();
+});
+
+module.exports = router;
+"scripts": {
+  "start": "node app.js",
+  "dev": "nodemon app.js"
+}
+npm run dev
